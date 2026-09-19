@@ -1,0 +1,365 @@
+/* ===================================================
+   Movie Night Matcher — Animations CSS
+   3D transforms, keyframes, micro-interactions
+   =================================================== */
+
+/* ─── Global Keyframes ───────────────────────────── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-12px) rotate(1deg); }
+  66%       { transform: translateY(-6px) rotate(-0.5deg); }
+}
+
+@keyframes floatReverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(10px) rotate(-1deg); }
+  66%       { transform: translateY(5px) rotate(0.5deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.04); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@keyframes shimmerGold {
+  0%   { background-position: -800px 0; }
+  100% { background-position: 800px 0; }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(212,160,23,0.15); box-shadow: 0 0 0 rgba(212,160,23,0); }
+  50%       { border-color: rgba(212,160,23,0.5); box-shadow: 0 0 30px rgba(212,160,23,0.2); }
+}
+
+@keyframes rotateCard {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+
+@keyframes stampIn {
+  0%   { opacity: 0; transform: scale(3) rotate(-15deg); }
+  60%  { opacity: 1; transform: scale(0.85) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-5deg); }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%       { transform: scale(1.2); }
+  28%       { transform: scale(1); }
+  42%       { transform: scale(1.12); }
+  70%       { transform: scale(1); }
+}
+
+@keyframes confettiFall {
+  0%   { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes confettiSway {
+  0%, 100% { margin-left: 0; }
+  25%       { margin-left: 30px; }
+  75%       { margin-left: -30px; }
+}
+
+@keyframes matchReveal {
+  0%   { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+  70%  { transform: scale(1.05) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes neonPulse {
+  0%, 100% { text-shadow: 0 0 20px rgba(212,160,23,0.6), 0 0 40px rgba(212,160,23,0.3); }
+  50%       { text-shadow: 0 0 40px rgba(212,160,23,0.9), 0 0 80px rgba(212,160,23,0.5), 0 0 120px rgba(212,160,23,0.2); }
+}
+
+@keyframes votePing {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes curtainOpen {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+@keyframes curtainOpenRight {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+  to   { width: var(--target-width, 100%); }
+}
+
+@keyframes bounceBall {
+  0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+  50%       { transform: translateY(-20px); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+}
+
+/* ─── Animation Utility Classes ──────────────────── */
+.anim-fadeInUp     { animation: fadeInUp var(--dur-slow) var(--ease-cinematic) both; }
+.anim-fadeInDown   { animation: fadeInDown var(--dur-slow) var(--ease-cinematic) both; }
+.anim-fadeIn       { animation: fadeIn var(--dur-slow) var(--ease-cinematic) both; }
+.anim-scaleIn      { animation: scaleIn var(--dur-slow) var(--ease-bounce) both; }
+.anim-slideInLeft  { animation: slideInLeft var(--dur-slow) var(--ease-cinematic) both; }
+.anim-slideInRight { animation: slideInRight var(--dur-slow) var(--ease-cinematic) both; }
+.anim-float        { animation: float 6s ease-in-out infinite; }
+.anim-float-rev    { animation: floatReverse 7s ease-in-out infinite; }
+.anim-pulse        { animation: pulse 3s ease-in-out infinite; }
+.anim-heartbeat    { animation: heartbeat 1.4s ease-in-out infinite; }
+.anim-neon         { animation: neonPulse 2s ease-in-out infinite; }
+.anim-borderGlow   { animation: borderGlow 2s ease-in-out infinite; }
+
+/* Delay utilities */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-800 { animation-delay: 800ms; }
+.delay-1000 { animation-delay: 1000ms; }
+
+/* ─── 3D Card Perspective Scene ──────────────────── */
+.perspective-scene {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* ─── Swipe Deck 3D Transforms ───────────────────── */
+.swipe-card {
+  transform-style: preserve-3d;
+  transition: transform 0.15s var(--ease-smooth);
+  will-change: transform;
+  cursor: grab;
+}
+
+.swipe-card:active { cursor: grabbing; }
+
+.swipe-card.is-leaving-right {
+  animation: leaveRight 0.45s var(--ease-cinematic) forwards;
+}
+
+.swipe-card.is-leaving-left {
+  animation: leaveLeft 0.45s var(--ease-cinematic) forwards;
+}
+
+.swipe-card.is-leaving-up {
+  animation: leaveUp 0.4s var(--ease-cinematic) forwards;
+}
+
+@keyframes leaveRight {
+  to {
+    transform: translateX(150%) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+@keyframes leaveLeft {
+  to {
+    transform: translateX(-150%) rotate(-25deg);
+    opacity: 0;
+  }
+}
+
+@keyframes leaveUp {
+  to {
+    transform: translateY(-150%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Card flip for detail view */
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.7s var(--ease-cinematic);
+}
+
+.card-flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face,
+.card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+/* ─── Like / Dislike Stamp Overlays ──────────────── */
+.stamp-like,
+.stamp-dislike,
+.stamp-superlike {
+  position: absolute;
+  top: 30px;
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  border-width: 4px;
+  border-style: solid;
+  opacity: 0;
+  pointer-events: none;
+  letter-spacing: 0.05em;
+  transition: opacity 0.1s;
+  z-index: 10;
+}
+
+.stamp-like {
+  left: 20px;
+  color: #1CE783;
+  border-color: #1CE783;
+  transform: rotate(-15deg);
+  text-shadow: 0 0 20px rgba(28, 231, 131, 0.5);
+}
+
+.stamp-dislike {
+  right: 20px;
+  color: #FF4455;
+  border-color: #FF4455;
+  transform: rotate(15deg);
+  text-shadow: 0 0 20px rgba(255, 68, 85, 0.5);
+}
+
+.stamp-superlike {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 30px;
+  top: auto;
+  color: var(--clr-gold);
+  border-color: var(--clr-gold);
+  font-size: 1.6rem;
+  text-shadow: 0 0 20px rgba(212,160,23,0.6);
+}
+
+/* ─── Progress Bar Animation ─────────────────────── */
+.progress-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--grad-gold);
+  transition: width 0.6s var(--ease-smooth);
+  box-shadow: 0 0 12px rgba(212,160,23,0.5);
+}
+
+/* ─── Avatar Pulse (live presence) ──────────────── */
+.avatar-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid var(--clr-gold);
+  animation: votePing 1.5s ease-out infinite;
+}
+
+/* ─── Shimmer Loading ─────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--clr-surface) 0%,
+    rgba(255,255,255,0.08) 50%,
+    var(--clr-surface) 100%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Hover Lift Effect ───────────────────────────── */
+.hover-lift {
+  transition: transform var(--dur-med) var(--ease-bounce),
+              box-shadow var(--dur-med) var(--ease-smooth);
+}
+.hover-lift:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-gold);
+}
+
+/* ─── Ripple Effect ──────────────────────────────── */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+/* ─── Confetti Particles ─────────────────────────── */
+.confetti-particle {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  border-radius: 2px;
+  animation: confettiFall 3s ease-in forwards,
+             confettiSway 0.8s ease-in-out infinite;
+  z-index: 9998;
+  pointer-events: none;
+}
+
+/* ─── Match Explosion ────────────────────────────── */
+.match-badge {
+  animation: matchReveal 0.8s var(--ease-bounce) both;
+}
+
+.match-stamp {
+  display: inline-block;
+  animation: stampIn 0.6s var(--ease-bounce) both;
+}

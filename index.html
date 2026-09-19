@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Night Matcher — Swipe. Match. Watch.</title>
+  <meta name="description" content="The ultimate group movie decision app. Swipe through movies with friends, match together, and discover where to stream — powered by AI.">
+  <meta property="og:title" content="Movie Night Matcher">
+  <meta property="og:description" content="Swipe movies with friends until everyone agrees. Real-time rooms, AI picks, streaming info.">
+  <meta name="theme-color" content="#050508">
+
+  <!-- Preload fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- QR Code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <style>
+    /* ── Extra inline styles ── */
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; background: var(--clr-surface); border-radius: var(--radius-full); padding: 4px; }
+    .tab-btn {
+      padding: 8px 20px; border-radius: var(--radius-full); border: none; cursor: pointer;
+      background: transparent; color: var(--clr-text-secondary); font-family: var(--font-body);
+      font-size: 0.85rem; font-weight: 500; transition: all var(--dur-med) var(--ease-smooth);
+    }
+    .tab-btn.active { background: var(--clr-surface-2); color: var(--clr-text-primary); box-shadow: inset 0 0 0 1px var(--clr-border); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Hidden utility */
+    .hidden { display: none !important; }
+
+    /* Section headers */
+    .section-header {
+      display: flex; align-items: center; gap: var(--sp-sm);
+      font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--clr-text-muted); font-family: var(--font-ui); font-weight: 700;
+      margin-bottom: var(--sp-md);
+    }
+    .section-header::after { content:''; flex:1; height:1px; background:var(--clr-border); }
+
+    /* Genre filter buttons */
+    .genre-filter-btn {
+      padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--clr-border);
+      background: var(--clr-surface); color: var(--clr-text-secondary); cursor: pointer;
+      font-family: var(--font-ui); font-size: 0.75rem; font-weight: 600;
+      transition: all var(--dur-med) var(--ease-bounce);
+    }
+    .genre-filter-btn:hover,
+    .genre-filter-btn.active {
+      border-color: var(--clr-gold); color: var(--clr-gold);
+      background: rgba(212,160,23,0.08);
+    }
+
+    /* Settings panel */
+    .settings-section { margin-bottom: var(--sp-xl); }
+    .settings-section h4 { color: var(--clr-gold); margin-bottom: var(--sp-md); font-size:0.85rem; letter-spacing:0.06em; }
+
+    /* Match genres row */
+    .card-meta { gap: var(--sp-sm); flex-wrap: wrap; align-items: center; }
+    .card-meta span { display:inline-flex; align-items:center; }
+
+    /* Swipe screen header extras */
+    .swipe-progress {
+      display: flex; align-items: center; gap: var(--sp-sm);
+      font-size: 0.78rem; font-family: var(--font-ui); color: var(--clr-text-muted);
+    }
+
+    /* Match hero flame deco */
+    .match-flame {
+      font-size: 3rem;
+      animation: heartbeat 1.4s ease-in-out infinite;
+      display: inline-block;
+    }
+
+    /* Film strip decorative top bar */
+    .film-strip {
+      position: fixed; top:0; left:0; right:0; height: 5px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--clr-gold) 0px, var(--clr-gold) 20px,
+        transparent 20px, transparent 30px
+      );
+      opacity: 0.4;
+      z-index: 200;
+    }
+
+    /* Glow separator */
+    .glow-sep {
+      width: 80px; height: 2px;
+      background: var(--grad-gold);
+      border-radius: 999px;
+      margin: var(--sp-md) auto;
+      box-shadow: 0 0 16px rgba(212,160,23,0.5);
+    }
+
+    /* ── Swipe screen layout ── */
+    #screen-swipe .swipe-main {
+      perspective: 1200px;
+    }
+
+    /* Live vote indicator */
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: var(--radius-full);
+      background: rgba(220,30,30,0.15); border: 1px solid rgba(220,30,30,0.4);
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #FF5555; font-family: var(--font-ui);
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #FF5555; animation: pulse 1s ease-in-out infinite;
+    }
+
+    /* Empty deck state */
+    .deck-empty {
+      text-align: center; padding: var(--sp-2xl);
+      display: flex; flex-direction: column; align-items: center; gap: var(--sp-md);
+    }
+    .deck-empty .empty-emoji { font-size: 4rem; animation: float 3s ease-in-out infinite; }
+
+    /* Card count indicator */
+    .card-count {
+      position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
+      font-size: 0.72rem; font-family: var(--font-ui); color: var(--clr-text-muted);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Film strip top decoration -->
+<div class="film-strip"></div>
+
+<!-- Theater curtains -->
+<div class="curtain-left"></div>
+<div class="curtain-right"></div>
+
+<!-- Spotlight -->
+<div class="spotlight"></div>
+
+<!-- Three.js background canvas -->
+<canvas id="three-canvas"></canvas>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <div class="film-reel"></div>
+  <div style="font-family: var(--font-display); font-size: 1.6rem; font-weight: 900;"
+       class="text-gold">Movie Night Matcher</div>
+  <div style="color: var(--clr-text-muted); font-size: 0.8rem; margin-top: 8px; font-family: var(--font-ui);">
+    Loading the cinematic experience…
+  </div>
+</div>
+
+<!-- Navigation Bar -->
+<nav class="navbar" style="z-index:100">
+  <div id="nav-logo" class="navbar-logo">
+    <div class="logo-icon">🎬</div>
+    <span class="logo-text">MovieMatcher</span>
+  </div>
+  <div style="display:flex; align-items:center; gap: var(--sp-md);">
+    <button class="btn btn-ghost btn-sm" id="btn-settings">⚙ Settings</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 1 — LANDING
+═══════════════════════════════════════════════ -->
+<div id="screen-landing" class="screen">
+  <!-- Floating movie card previews (background decoration) -->
+  <div class="floating-cards-preview">
+    <div class="preview-card anim-float" style="top:10%; left:3%; transform:rotate(-8deg); animation-delay:0s;">
+      <img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="">
+    </div>
+    <div class="preview-card anim-float-rev" style="top:20%; right:4%; transform:rotate(6deg); animation-delay:0.5s;">
+      <img src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="">
+    </div>
+    <div class="preview-card anim-float" style="bottom:15%; left:6%; transform:rotate(5deg); animation-delay:1s;">
+      <img src="https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" alt="">
+    </div>
+    <div class="preview-card anim-float-rev" style="bottom:20%; right:5%; transform:rotate(-7deg); animation-delay:0.8s;">
+      <img src="https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg" alt="">
+    </div>
+    <div class="preview-card anim-float" style="top:50%; left:1%; transform:rotate(-3deg) translateY(-50%); animation-delay:1.5s; opacity:0.5;">
+      <img src="https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" alt="">
+    </div>
+    <div class="preview-card anim-float-rev" style="top:50%; right:1%; transform:rotate(4deg) translateY(-50%); animation-delay:0.3s; opacity:0.5;">
+      <img src="https://image.tmdb.org/t/p/w500/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg" alt="">
+    </div>
+  </div>
+
+  <!-- Hero Content -->
+  <div style="position:relative; z-index:10; max-width: 720px; padding: 0 var(--sp-lg);">
+    <div class="hero-eyebrow">
+      <span class="live-dot"></span>
+      AI-Powered · Real-Time · Multiplayer
+    </div>
+
+    <h1 class="hero-title">
+      <span class="line-1 text-gold anim-neon">Movie Night</span>
+      <span class="line-1">Matcher</span>
+    </h1>
+
+    <div class="glow-sep"></div>
+
+    <p class="hero-description">
+      Stop arguing about what to watch. Swipe through movies with your friends
+      until <em>everyone</em> agrees — then discover where it's streaming.
+      Powered by AI that learns your taste.
+    </p>
+
+    <div class="hero-cta">
+      <button class="btn btn-primary btn-lg ripple-container" id="btn-create-room">
+        🎬 Create Room
+      </button>
+      <button class="btn btn-ghost btn-lg" id="btn-join-room">
+        🔑 Join Room
+      </button>
+    </div>
+
+    <!-- Feature pills -->
+    <div class="feature-pills">
+      <div class="pill"><span class="pill-dot"></span>Real-time multiplayer</div>
+      <div class="pill"><span class="pill-dot"></span>Swipe to vote</div>
+      <div class="pill"><span class="pill-dot"></span>Streaming availability</div>
+      <div class="pill"><span class="pill-dot"></span>AI recommendations</div>
+      <div class="pill"><span class="pill-dot"></span>QR code invite</div>
+      <div class="pill"><span class="pill-dot"></span>3D card animations</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 2 — ROOM SETUP
+═══════════════════════════════════════════════ -->
+<div id="screen-room" class="screen">
+  <div style="position:relative; z-index:10; width:min(540px,100% - 2rem); margin:auto; padding: 120px var(--sp-md) var(--sp-xl);">
+
+    <!-- Back button -->
+    <button class="btn btn-ghost btn-sm" id="btn-back-to-landing" style="margin-bottom:var(--sp-xl)">
+      ← Back
+    </button>
+
+    <!-- Tabs -->
+    <div class="tabs" style="margin-bottom:var(--sp-xl);">
+      <button class="tab-btn active" data-tab="create-panel" onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='create-panel'));">
+        🎬 Create Room
+      </button>
+      <button class="tab-btn" data-tab="join-panel" onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='join-panel'));">
+        🔑 Join Room
+      </button>
+    </div>
+
+    <!-- Create Panel -->
+    <div id="create-panel" class="tab-panel active glass" style="padding:var(--sp-xl);">
+      <h2 style="margin-bottom:var(--sp-md);">Create a <span class="text-gold">Room</span></h2>
+      <p style="color:var(--clr-text-secondary); font-size:0.9rem; margin-bottom:var(--sp-xl);">
+        Share the 6-digit code with friends to join your session.
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:var(--sp-lg);">
+        <div class="input-group">
+          <label class="input-label" for="input-host-name">Your Name</label>
+          <input class="input" id="input-host-name" type="text" placeholder="e.g. Alex" maxlength="20" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">TMDB API Key (for real movies)</label>
+          <input class="input" id="input-create-tmdb" type="text" placeholder="Paste your TMDB API key here">
+          <small style="color:var(--clr-text-muted);">
+            Get a free key at <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color:var(--clr-gold);">themoviedb.org</a>
+          </small>
+        </div>
+
+        <button class="btn btn-primary" id="btn-confirm-create" style="width:100%; justify-content:center;">
+          ✨ Create Room
+        </button>
+      </div>
+    </div>
+
+    <!-- Join Panel -->
+    <div id="join-panel" class="tab-panel glass" style="padding:var(--sp-xl);">
+      <h2 style="margin-bottom:var(--sp-md);">Join a <span class="text-gold">Room</span></h2>
+      <p style="color:var(--clr-text-secondary); font-size:0.9rem; margin-bottom:var(--sp-xl);">
+        Enter the 6-digit code from your friend's session.
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:var(--sp-lg);">
+        <div class="input-group">
+          <label class="input-label" for="input-join-name">Your Name</label>
+          <input class="input" id="input-join-name" type="text" placeholder="e.g. Sam" maxlength="20" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="input-room-code">Room Code</label>
+          <input class="input input-code" id="input-room-code" type="text"
+                 placeholder="ABCD12" maxlength="6"
+                 autocomplete="off" style="text-transform:uppercase;"
+                 oninput="this.value=this.value.toUpperCase()">
+        </div>
+
+        <button class="btn btn-primary" id="btn-confirm-join" style="width:100%; justify-content:center;">
+          🚀 Join Room
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 3 — LOBBY
+═══════════════════════════════════════════════ -->
+<div id="screen-lobby" class="screen">
+  <div style="position:relative; z-index:10; width:min(600px,100% - 2rem); margin:auto; padding: 120px var(--sp-md) var(--sp-xl); display:flex; flex-direction:column; align-items:center; gap:var(--sp-xl);">
+
+    <div class="text-center anim-fadeInDown">
+      <div class="room-code-label">Room Code</div>
+      <div class="room-code-value" id="lobby-room-code">------</div>
+    </div>
+
+    <!-- QR code -->
+    <div class="glass" style="padding:var(--sp-md); display:flex; flex-direction:column; align-items:center; gap:var(--sp-md); width:100%;">
+      <div style="display:flex; align-items:center; gap:var(--sp-md);">
+        <div id="qr-code-container" class="qr-container" style="min-width:128px; min-height:128px; display:flex; align-items:center; justify-content:center;"></div>
+        <div>
+          <h4 style="margin-bottom:var(--sp-sm);">Invite Friends</h4>
+          <p style="color:var(--clr-text-secondary); font-size:0.85rem; line-height:1.6;">
+            Share the code or scan the QR to join instantly.
+          </p>
+          <button class="btn btn-ghost btn-sm" id="btn-copy-code" style="margin-top:var(--sp-sm);">
+            📋 Copy Code
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members -->
+    <div style="width:100%;">
+      <div class="section-header">Members Online</div>
+      <div id="lobby-members-list" class="lobby-members"></div>
+    </div>
+
+    <!-- Wait message (for non-hosts) -->
+    <div id="lobby-wait-msg" style="display:none; text-align:center; color:var(--clr-text-muted); font-size:0.9rem;">
+      ⏳ Waiting for the host to start the session…
+    </div>
+
+    <!-- Start button (host only) -->
+    <button class="btn btn-primary btn-lg" id="btn-start-swiping" style="width:100%; justify-content:center;" disabled>
+      🎬 Start Swiping
+    </button>
+    <small id="lobby-hint" style="color:var(--clr-text-muted); font-size:0.75rem; text-align:center;">
+      At least 2 people needed to start
+    </small>
+
+    <button class="btn btn-ghost btn-sm" id="btn-back-to-room">← Change Settings</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 4 — SWIPE
+═══════════════════════════════════════════════ -->
+<div id="screen-swipe" class="screen">
+
+  <!-- Header -->
+  <div class="swipe-header">
+    <div style="display:flex; align-items:center; gap:var(--sp-md);">
+      <span id="nav-logo-swipe" class="navbar-logo" style="cursor:pointer" onclick="App.navigateTo('landing')">
+        <span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;">🎬</span>
+        <span class="logo-text" style="font-size:1rem;">Matcher</span>
+      </span>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        Live
+      </div>
+    </div>
+
+    <!-- Vote avatars (who has voted) -->
+    <div id="vote-avatars" class="vote-progress-bar"></div>
+
+    <!-- Swipe stats -->
+    <div class="swipe-progress">
+      <span id="swipe-mood">🎬 Explorer</span>
+      <span style="color:var(--clr-border);">|</span>
+      <span id="swipe-count">0/0</span>
+    </div>
+  </div>
+
+  <!-- Main swipe area -->
+  <div class="swipe-main">
+
+    <!-- Genre filters -->
+    <div style="position:absolute; top: var(--sp-md); left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:6px; flex-wrap:wrap; justify-content:center; padding:0 var(--sp-md);">
+      <button class="genre-filter-btn active" data-genre="0">🌟 All</button>
+      <button class="genre-filter-btn" data-genre="28">💥 Action</button>
+      <button class="genre-filter-btn" data-genre="35">😂 Comedy</button>
+      <button class="genre-filter-btn" data-genre="18">🎭 Drama</button>
+      <button class="genre-filter-btn" data-genre="27">👻 Horror</button>
+      <button class="genre-filter-btn" data-genre="878">🚀 Sci-Fi</button>
+      <button class="genre-filter-btn" data-genre="10749">💕 Romance</button>
+    </div>
+
+    <!-- Card stack -->
+    <div class="card-stack perspective-scene" style="position:relative;">
+      <div id="card-stack"></div>
+      <div class="card-count" id="card-count-label"></div>
+    </div>
+
+  </div>
+
+  <!-- Action buttons -->
+  <div class="swipe-footer">
+    <button class="action-btn btn-dislike" id="btn-action-dislike" title="Nope (←)">✕</button>
+    <button class="action-btn btn-info" id="btn-action-info" title="More info">ℹ</button>
+    <button class="action-btn btn-superlike" id="btn-action-superlike" title="Super Like (↑)">⭐</button>
+    <button class="action-btn btn-info" style="font-size:0.8rem;" id="btn-action-back" title="Undo" onclick="App.toast('Undo not available in this session','error')">↩</button>
+    <button class="action-btn btn-like" id="btn-action-like" title="Like (→)">♥</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 5 — MATCH
+═══════════════════════════════════════════════ -->
+<div id="screen-match" class="screen">
+  <div style="position:relative; z-index:10; width:min(860px,100% - 2rem); margin:auto; padding: 100px var(--sp-md) var(--sp-xl);">
+
+    <!-- Header -->
+    <div class="text-center" style="margin-bottom:var(--sp-xl);">
+      <div class="match-flame">🎉</div>
+      <h1 class="match-title">It's a Match!</h1>
+      <p class="match-subtitle">Everyone agreed — grab the popcorn!</p>
+      <div class="glow-sep"></div>
+    </div>
+
+    <!-- Matched movie card -->
+    <div class="match-card glass" style="padding:var(--sp-xl);">
+      <img id="match-poster" class="match-poster" src="" alt="">
+
+      <div class="match-details">
+        <h2 id="match-movie-title" class="match-movie-title"></h2>
+        <div id="match-meta" class="card-meta"></div>
+        <p id="match-overview" class="match-overview"></p>
+
+        <!-- Taste summary -->
+        <div id="match-taste" style="display:flex; align-items:center; gap:var(--sp-sm); font-size:0.85rem; color:var(--clr-text-secondary); flex-wrap:wrap;"></div>
+
+        <!-- Streaming availability -->
+        <div>
+          <div class="section-header" style="margin-top:var(--sp-md);">Where to Watch</div>
+          <div id="match-streaming-list" class="match-streaming-list"></div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="match-actions" style="margin-top:var(--sp-lg);">
+          <button class="btn btn-primary" id="btn-watch-again">🔄 Watch Again</button>
+          <button class="btn btn-ghost" id="btn-new-session">🏠 New Session</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trailer embed -->
+    <div id="match-trailer-container"></div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════ -->
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay">
+  <div class="modal-panel" style="width:min(500px,100%);">
+    <div class="modal-handle"></div>
+    <h3 style="margin-bottom:var(--sp-xl);">⚙ Settings</h3>
+
+    <div class="settings-section">
+      <h4>🎬 TMDB API Key</h4>
+      <p style="color:var(--clr-text-muted); font-size:0.82rem; margin-bottom:var(--sp-md);">
+        Required for real movies and streaming data. Free at
+        <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color:var(--clr-gold);">themoviedb.org</a>
+      </p>
+      <div class="input-group">
+        <input class="input" id="input-tmdb-key" type="text" placeholder="Your TMDB API key">
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>🔥 Firebase Config</h4>
+      <p style="color:var(--clr-text-muted); font-size:0.82rem; margin-bottom:var(--sp-md);">
+        For real-time multiplayer. Free at
+        <a href="https://console.firebase.google.com" target="_blank" style="color:var(--clr-gold);">firebase.google.com</a>.
+        Without it, the app runs in local demo mode.
+      </p>
+      <div style="display:flex; flex-direction:column; gap:var(--sp-sm);">
+        <input class="input" id="fb-apikey"    type="text" placeholder="Firebase API Key" style="font-size:0.8rem; padding:10px 14px;">
+        <input class="input" id="fb-auth"      type="text" placeholder="Auth Domain (project.firebaseapp.com)" style="font-size:0.8rem; padding:10px 14px;">
+        <input class="input" id="fb-dburl"     type="text" placeholder="Database URL (https://project-default-rtdb.firebaseio.com)" style="font-size:0.8rem; padding:10px 14px;">
+        <input class="input" id="fb-project"   type="text" placeholder="Project ID" style="font-size:0.8rem; padding:10px 14px;">
+        <input class="input" id="fb-appid"     type="text" placeholder="App ID" style="font-size:0.8rem; padding:10px 14px;">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:var(--sp-md); margin-top:var(--sp-xl);">
+      <button class="btn btn-primary" id="btn-save-settings" style="flex:1;">
+        💾 Save Settings
+      </button>
+      <button class="btn btn-ghost" onclick="document.getElementById('settings-modal').classList.remove('open')">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Movie Detail Modal -->
+<div id="detail-modal" class="modal-overlay">
+  <div class="modal-panel" style="width:min(600px,100%);">
+    <!-- Filled dynamically by App.js -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     KEYBOARD SHORTCUTS (hint)
+═══════════════════════════════════════════════ -->
+<script>
+  // Keyboard shortcuts for swipe screen
+  document.addEventListener('keydown', (e) => {
+    const screen = document.querySelector('.screen.active');
+    if (!screen || screen.id !== 'screen-swipe') return;
+    if (e.key === 'ArrowRight' || e.key === 'l') document.getElementById('btn-action-like')?.click();
+    if (e.key === 'ArrowLeft'  || e.key === 'n') document.getElementById('btn-action-dislike')?.click();
+    if (e.key === 'ArrowUp'    || e.key === 's') document.getElementById('btn-action-superlike')?.click();
+    if (e.key === 'i')                           document.getElementById('btn-action-info')?.click();
+  });
+
+  // Save TMDB key from create room form
+  document.getElementById('btn-confirm-create')?.addEventListener('click', () => {
+    const key = document.getElementById('input-create-tmdb')?.value.trim();
+    if (key) TMDB?.setApiKey(key);
+  }, true); // capture phase so it runs before app.js handler
+
+  // Save Firebase config from settings
+  document.getElementById('btn-save-settings')?.addEventListener('click', () => {
+    const cfg = {
+      apikey:   document.getElementById('fb-apikey')?.value.trim(),
+      auth:     document.getElementById('fb-auth')?.value.trim(),
+      dburl:    document.getElementById('fb-dburl')?.value.trim(),
+      project:  document.getElementById('fb-project')?.value.trim(),
+      appid:    document.getElementById('fb-appid')?.value.trim(),
+    };
+    if (cfg.apikey) RoomManager?.saveFirebaseConfig(cfg);
+    const tmdbKey = document.getElementById('input-tmdb-key')?.value.trim();
+    if (tmdbKey) TMDB?.setApiKey(tmdbKey);
+  }, true);
+
+  // Check URL params for ?join=CODE
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const joinCode = params.get('join');
+    if (joinCode) {
+      setTimeout(() => {
+        // Pre-fill join code
+        const codeInput = document.getElementById('input-room-code');
+        if (codeInput) codeInput.value = joinCode.toUpperCase();
+      }, 2500);
+    }
+  });
+</script>
+
+<!-- ── Module scripts ── -->
+<script src="js/tmdb.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/room.js"></script>
+<script src="js/three-scene.js"></script>
+<script src="js/swipe-deck.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

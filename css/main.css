@@ -1,0 +1,373 @@
+/* ===================================================
+   Movie Night Matcher — Main CSS
+   Design System: Cinematic Theater Theme
+   =================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700;800;900&display=swap');
+
+/* ─── CSS Custom Properties ─────────────────────── */
+:root {
+  /* Color Palette */
+  --clr-bg:           #050508;
+  --clr-bg-2:         #0d0d14;
+  --clr-bg-3:         #12121c;
+  --clr-surface:      rgba(255, 255, 255, 0.04);
+  --clr-surface-2:    rgba(255, 255, 255, 0.08);
+  --clr-border:       rgba(255, 255, 255, 0.08);
+  --clr-border-glow:  rgba(212, 160, 23, 0.3);
+
+  /* Brand Colors */
+  --clr-gold:         #D4A017;
+  --clr-gold-light:   #F5C842;
+  --clr-gold-dark:    #9B7213;
+  --clr-crimson:      #8B0000;
+  --clr-crimson-glow: rgba(139, 0, 0, 0.4);
+  --clr-velvet:       #3D0C1E;
+  --clr-purple:       #6B21A8;
+  --clr-purple-light: #A855F7;
+
+  /* Text */
+  --clr-text-primary:   #F5F0E8;
+  --clr-text-secondary: rgba(245, 240, 232, 0.6);
+  --clr-text-muted:     rgba(245, 240, 232, 0.35);
+
+  /* Streaming Colors */
+  --clr-netflix:   #E50914;
+  --clr-prime:     #00A8E0;
+  --clr-disney:    #113CCF;
+  --clr-hbo:       #6B21A8;
+  --clr-hulu:      #1CE783;
+  --clr-apple:     #FFFFFF;
+
+  /* Gradients */
+  --grad-gold:       linear-gradient(135deg, #D4A017 0%, #F5C842 50%, #D4A017 100%);
+  --grad-bg:         radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.08) 0%, transparent 60%),
+                     radial-gradient(ellipse at 100% 80%, rgba(139,0,0,0.12) 0%, transparent 50%),
+                     radial-gradient(ellipse at 0% 100%, rgba(107,33,168,0.1) 0%, transparent 50%);
+  --grad-card:       linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.92) 100%);
+  --grad-curtain-l:  linear-gradient(90deg, #1a0610 0%, #3D0C1E 50%, transparent 100%);
+  --grad-curtain-r:  linear-gradient(270deg, #1a0610 0%, #3D0C1E 50%, transparent 100%);
+
+  /* Shadows */
+  --shadow-card:     0 25px 80px rgba(0,0,0,0.8), 0 8px 32px rgba(0,0,0,0.6);
+  --shadow-gold:     0 0 40px rgba(212,160,23,0.4), 0 0 80px rgba(212,160,23,0.15);
+  --shadow-crimson:  0 0 40px rgba(139,0,0,0.5), 0 0 80px rgba(139,0,0,0.2);
+  --shadow-glow:     0 0 0 1px rgba(212,160,23,0.2), 0 8px 32px rgba(0,0,0,0.6);
+
+  /* Typography */
+  --font-display:  'Playfair Display', serif;
+  --font-body:     'Space Grotesk', sans-serif;
+  --font-ui:       'Inter', sans-serif;
+
+  /* Spacing */
+  --sp-xs:  4px;
+  --sp-sm:  8px;
+  --sp-md:  16px;
+  --sp-lg:  24px;
+  --sp-xl:  40px;
+  --sp-2xl: 64px;
+  --sp-3xl: 96px;
+
+  /* Border Radius */
+  --radius-sm:   8px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --radius-xl:   32px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --ease-bounce:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-cinematic: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast:  150ms;
+  --dur-med:   300ms;
+  --dur-slow:  600ms;
+  --dur-epic: 1200ms;
+}
+
+/* ─── Reset & Base ───────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--clr-bg);
+  background-image: var(--grad-bg);
+  background-attachment: fixed;
+  color: var(--clr-text-primary);
+  font-family: var(--font-body);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+::selection {
+  background: rgba(212, 160, 23, 0.3);
+  color: var(--clr-gold-light);
+}
+
+/* ─── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track { background: var(--clr-bg); }
+::-webkit-scrollbar-thumb {
+  background: var(--clr-gold-dark);
+  border-radius: var(--radius-full);
+}
+
+/* ─── Typography ─────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; }
+h2 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; }
+h3 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 700; }
+h4 { font-size: 1.1rem; font-weight: 700; font-family: var(--font-body); }
+
+p { font-family: var(--font-body); }
+small { font-size: 0.8rem; font-family: var(--font-ui); }
+
+.text-gold {
+  background: var(--grad-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-muted    { color: var(--clr-text-muted); }
+.text-secondary { color: var(--clr-text-secondary); }
+.text-center   { text-align: center; }
+
+/* ─── App Shell / Routing ─────────────────────────── */
+#app {
+  min-height: 100dvh;
+  position: relative;
+}
+
+.screen {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-cinematic),
+              transform var(--dur-slow) var(--ease-cinematic);
+  transform: translateY(20px);
+  overflow: hidden;
+  z-index: 1;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+  z-index: 10;
+}
+
+/* ─── Three.js Canvas ────────────────────────────── */
+#three-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── Layout Utilities ───────────────────────────── */
+.container {
+  width: min(1200px, 100% - 2rem);
+  margin-inline: auto;
+}
+
+.flex        { display: flex; }
+.flex-col    { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-sm { gap: var(--sp-sm); }
+.gap-md { gap: var(--sp-md); }
+.gap-lg { gap: var(--sp-lg); }
+.gap-xl { gap: var(--sp-xl); }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-lg);
+}
+
+/* ─── Glassmorphism Panels ───────────────────────── */
+.glass {
+  background: var(--clr-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+}
+
+.glass-gold {
+  background: rgba(212, 160, 23, 0.06);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(212, 160, 23, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+/* ─── Theater Curtain Decorations ────────────────── */
+.curtain-left,
+.curtain-right {
+  position: fixed;
+  top: 0;
+  width: 140px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  transition: transform 1.2s var(--ease-cinematic);
+}
+
+.curtain-left {
+  left: 0;
+  background: var(--grad-curtain-l);
+}
+
+.curtain-right {
+  right: 0;
+  background: var(--grad-curtain-r);
+}
+
+.curtain-left::before,
+.curtain-right::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 40px,
+    rgba(255, 255, 255, 0.015) 40px,
+    rgba(255, 255, 255, 0.015) 41px
+  );
+}
+
+.curtain-left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212,160,23,0.15));
+}
+
+.curtain-right::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(270deg, transparent, rgba(212,160,23,0.15));
+}
+
+/* Spotlight effect at top */
+.spotlight {
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse at center top, rgba(212,160,23,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+  animation: spotlightPulse 4s ease-in-out infinite;
+}
+
+@keyframes spotlightPulse {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scaleX(1); }
+  50%       { opacity: 1;   transform: translateX(-50%) scaleX(1.1); }
+}
+
+/* ─── Notification Toast ─────────────────────────── */
+#toast-container {
+  position: fixed;
+  top: var(--sp-lg);
+  right: var(--sp-lg);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+}
+
+.toast {
+  padding: var(--sp-md) var(--sp-lg);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--clr-surface-2);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text-primary);
+  transform: translateX(120%);
+  transition: transform var(--dur-med) var(--ease-bounce);
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+
+.toast.show       { transform: translateX(0); }
+.toast.toast-success { border-color: rgba(30,200,100,0.3); }
+.toast.toast-error   { border-color: rgba(220,60,60,0.3); }
+.toast.toast-gold    { border-color: rgba(212,160,23,0.4); background: rgba(212,160,23,0.08); }
+
+/* ─── Loading Screen ─────────────────────────────── */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--clr-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.8s var(--ease-cinematic);
+}
+
+#loading-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.film-reel {
+  width: 80px;
+  height: 80px;
+  border: 3px solid rgba(212,160,23,0.2);
+  border-top-color: var(--clr-gold);
+  border-radius: 50%;
+  animation: reelSpin 0.8s linear infinite;
+  margin-bottom: var(--sp-lg);
+}
+
+@keyframes reelSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Responsive ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .curtain-left, .curtain-right { width: 60px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .spotlight { width: 300px; }
+}
